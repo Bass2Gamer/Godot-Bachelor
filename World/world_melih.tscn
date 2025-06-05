@@ -1,0 +1,212 @@
+[gd_scene load_steps=18 format=3 uid="uid://5e0hgg6vnc60"]
+
+[ext_resource type="Texture2D" uid="uid://b50o42smb621t" path="res://Material/Grid.png" id="1_n12e5"]
+[ext_resource type="PackedScene" uid="uid://4eudlhnms51u" path="res://Player/Models/knight.tscn" id="2_c1ggj"]
+[ext_resource type="Script" uid="uid://q48koxlvnh0h" path="res://Player/Scripts/player.gd" id="2_ouh4o"]
+[ext_resource type="Resource" uid="uid://c4jtetx4ndaap" path="res://Player/Scripts/MovementStates/idle.tres" id="3_hj1fr"]
+[ext_resource type="Script" uid="uid://de0vj678hsdwh" path="res://Player/Scripts/camera_controller.gd" id="3_rfcsp"]
+[ext_resource type="Resource" uid="uid://c5s6fm3nfauv6" path="res://Player/Scripts/MovementStates/run.tres" id="4_xqo5b"]
+[ext_resource type="Script" uid="uid://bdo7yg5fg0ej5" path="res://Player/Scripts/movement_controller.gd" id="5_kb7el"]
+[ext_resource type="Script" uid="uid://c5vh18yjr145f" path="res://Player/Scripts/animation_controller.gd" id="6_i4rdd"]
+
+[sub_resource type="Environment" id="Environment_n12e5"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_c1ggj"]
+albedo_texture = ExtResource("1_n12e5")
+uv1_triplanar = true
+uv1_world_triplanar = true
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_rfcsp"]
+
+[sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_kb7el"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_kb7el"]
+animation = &"Idle"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_i4rdd"]
+animation = &"Running_A"
+
+[sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_i4rdd"]
+blend_point_0/node = SubResource("AnimationNodeAnimation_kb7el")
+blend_point_0/pos = 0.0
+blend_point_1/node = SubResource("AnimationNodeAnimation_i4rdd")
+blend_point_1/pos = 1.0
+min_space = 0.0
+snap = 1.0
+
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_kb7el"]
+graph_offset = Vector2(-435.818, -18.3636)
+nodes/movement_anim_speed/node = SubResource("AnimationNodeTimeScale_kb7el")
+nodes/movement_anim_speed/position = Vector2(60, 120)
+nodes/movement_blend/node = SubResource("AnimationNodeBlendSpace1D_i4rdd")
+nodes/movement_blend/position = Vector2(-140, 120)
+nodes/output/position = Vector2(340, 140)
+node_connections = [&"movement_anim_speed", 0, &"movement_blend", &"output", 0, &"movement_anim_speed"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_c1ggj"]
+radius = 0.07
+
+[node name="World_Melih" type="Node3D"]
+
+[node name="DirectionalLight3D2" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75, -0.433013, 0, 4.67694, 0)
+light_energy = 0.7
+shadow_enabled = true
+shadow_opacity = 0.45
+sky_mode = 1
+
+[node name="DirectionalLight3D3" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.965926, -0.0771301, -0.247059, 0.0780351, 0.996932, -0.00614147, 0.246775, -0.0133471, 0.968981, 0, 4.67694, 0)
+light_energy = 0.03
+sky_mode = 1
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_n12e5")
+
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.999996, 0.00274334, -0.000936346, -0.00274212, 0.999995, 0.00130031, 0.000939924, -0.00129773, 0.999999, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_c1ggj")
+use_collision = true
+size = Vector3(100, 1, 100)
+
+[node name="Wall" type="CSGBox3D" parent="."]
+transform = Transform3D(0.999996, 0.00274334, -0.000936346, -0.00274212, 0.999995, 0.00130031, 0.000939924, -0.00129773, 0.999999, -0.0053125, 4.66321, 19.2567)
+material_override = SubResource("StandardMaterial3D_c1ggj")
+use_collision = true
+size = Vector3(20, 10, 3)
+
+[node name="Player" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8565, 0)
+script = ExtResource("2_ouh4o")
+movement_states = {
+&"idle": ExtResource("3_hj1fr"),
+&"run": ExtResource("4_xqo5b")
+}
+
+[node name="MovementController" type="Node" parent="Player" node_paths=PackedStringArray("player", "mesh_root")]
+script = ExtResource("5_kb7el")
+player = NodePath("..")
+mesh_root = NodePath("../MeshRoot")
+
+[node name="AnimationController" type="Node" parent="Player" node_paths=PackedStringArray("animation_tree", "player")]
+script = ExtResource("6_i4rdd")
+animation_tree = NodePath("../MeshRoot/AnimationTree")
+player = NodePath("..")
+
+[node name="Collider" type="CollisionShape3D" parent="Player"]
+shape = SubResource("CapsuleShape3D_rfcsp")
+
+[node name="MeshRoot" type="Node3D" parent="Player"]
+
+[node name="Knight" parent="Player/MeshRoot" instance=ExtResource("2_c1ggj")]
+
+[node name="Skeleton3D" parent="Player/MeshRoot/Knight/Rig" index="0"]
+bones/1/position = Vector3(0, 0.392064, 0)
+bones/1/rotation = Quaternion(-1.11123e-10, 0.0431578, 2.57241e-09, 0.999068)
+bones/2/rotation = Quaternion(-6.93889e-18, 7.10543e-15, 4.93038e-32, 1)
+bones/3/rotation = Quaternion(8.27181e-25, 3.72529e-09, -2.75506e-40, 1)
+bones/4/position = Vector3(0.212007, 0.134132, 7.92996e-08)
+bones/4/rotation = Quaternion(-0.559906, -0.0608803, -0.643974, 0.517779)
+bones/5/rotation = Quaternion(3.65498e-08, -4.88301e-08, -0.494719, 0.869053)
+bones/7/rotation = Quaternion(-0.321065, -0.325319, 0.145726, 0.87741)
+bones/8/position = Vector3(8.34843e-10, 0.0961252, -0.0575)
+bones/8/rotation = Quaternion(-3.6586e-09, 6.87811e-09, -0.707107, 0.707107)
+bones/14/position = Vector3(-0.212007, 0.134132, 8.6814e-08)
+bones/14/rotation = Quaternion(-0.618244, 0.0807287, 0.618012, 0.478873)
+bones/15/rotation = Quaternion(2.09853e-08, 5.12855e-08, 0.517939, 0.855417)
+bones/17/rotation = Quaternion(-0.319291, 0.300524, -0.22735, 0.869512)
+bones/18/position = Vector3(-1.5736e-08, 0.0961251, -0.0575)
+bones/18/rotation = Quaternion(-1.02444e-09, -4.24391e-09, 0.707107, 0.707107)
+bones/21/rotation = Quaternion(-5.80608e-11, -0.0313417, -1.88012e-09, 0.999509)
+bones/24/position = Vector3(0.170945, 0.113587, 1.59941e-08)
+bones/24/rotation = Quaternion(0.993715, 0.0837146, 0.0735038, 0.0109185)
+bones/25/rotation = Quaternion(0.195602, 6.26228e-08, -1.32239e-07, 0.980683)
+bones/26/rotation = Quaternion(-0.517564, -0.209497, 0.0436549, 0.828452)
+bones/27/rotation = Quaternion(-9.74065e-09, 0.920355, -0.391084, 7.8309e-08)
+bones/28/position = Vector3(-0.170945, 0.113587, 1.55755e-08)
+bones/28/rotation = Quaternion(0.997322, -0.0294574, 0.0315293, 0.0590483)
+bones/29/rotation = Quaternion(0.274008, -6.38135e-08, 1.92761e-07, 0.961727)
+bones/30/rotation = Quaternion(-0.559039, 0.114513, -0.00862763, 0.82115)
+bones/31/rotation = Quaternion(3.03591e-08, 0.920355, -0.391084, -6.95338e-08)
+bones/32/rotation = Quaternion(0.707107, -2.29302e-07, -4.60552e-08, 0.707107)
+bones/33/position = Vector3(0.202182, 0.0259903, 0.205181)
+bones/33/rotation = Quaternion(-0.707107, -7.05285e-08, -7.05285e-08, 0.707107)
+bones/34/rotation = Quaternion(9.65792e-09, 1.77955e-09, 0.985719, -0.168398)
+bones/35/position = Vector3(-2.60494e-08, 0.213436, -5.1715e-09)
+bones/35/rotation = Quaternion(-1.01273e-07, 0.391084, 0.920355, -3.35091e-08)
+bones/36/position = Vector3(8.58988e-09, 0.16565, -2.40963e-09)
+bones/37/rotation = Quaternion(1, -2.33136e-09, 1.99777e-07, -1.34211e-15)
+bones/39/rotation = Quaternion(0.707107, -3.82385e-08, 1.45009e-07, 0.707107)
+bones/40/rotation = Quaternion(-0.707107, -7.05285e-08, -7.05285e-08, 0.707107)
+bones/41/rotation = Quaternion(-5.83589e-09, 6.43837e-10, 0.994809, 0.101756)
+bones/42/position = Vector3(-1.11482e-08, 0.213436, -2.50942e-15)
+bones/42/rotation = Quaternion(-1.05796e-07, 0.391084, 0.920355, -2.58643e-08)
+bones/43/position = Vector3(-6.31128e-09, 0.16565, 2.70695e-09)
+bones/44/rotation = Quaternion(1, 3.76526e-09, 1.94879e-07, 7.45058e-09)
+bones/46/rotation = Quaternion(-0.707107, -7.27951e-08, -7.27951e-08, 0.707107)
+bones/47/position = Vector3(0.520841, 0.788312, -0.0576373)
+bones/47/rotation = Quaternion(0.794627, -1.11759e-07, 0.607098, -5.96046e-08)
+bones/48/rotation = Quaternion(-0.707107, -7.27951e-08, -7.27951e-08, 0.707107)
+bones/49/position = Vector3(-0.510844, 0.788312, 0.0597369)
+bones/49/rotation = Quaternion(-0.758253, -1.52737e-07, 0.651961, -1.11759e-08)
+
+[node name="1H_Sword_Offhand" parent="Player/MeshRoot/Knight/Rig/Skeleton3D" index="0"]
+transform = Transform3D(3.52814e-07, 0.262863, 0.964832, 0.999999, -3.84622e-07, -2.78179e-08, 5.02446e-07, 0.964833, -0.262863, 0.51224, 0.636705, -0.00210763)
+
+[node name="Badge_Shield" parent="Player/MeshRoot/Knight/Rig/Skeleton3D" index="1"]
+transform = Transform3D(3.75229e-07, 0.262863, 0.964833, 0.999999, -2.9198e-06, 6.39644e-07, 3.12392e-06, 0.964833, -0.262863, 0.662643, 0.636705, -0.0430841)
+
+[node name="Rectangle_Shield" parent="Player/MeshRoot/Knight/Rig/Skeleton3D" index="2"]
+transform = Transform3D(3.75229e-07, 0.262863, 0.964833, 0.999999, -2.9198e-06, 6.39644e-07, 3.12392e-06, 0.964833, -0.262863, 0.662643, 0.636705, -0.0430841)
+
+[node name="Round_Shield" parent="Player/MeshRoot/Knight/Rig/Skeleton3D" index="3"]
+transform = Transform3D(3.75229e-07, 0.262863, 0.964833, 0.999999, -2.9198e-06, 6.39644e-07, 3.12392e-06, 0.964833, -0.262863, 0.662643, 0.636705, -0.0430841)
+
+[node name="Spike_Shield" parent="Player/MeshRoot/Knight/Rig/Skeleton3D" index="4"]
+transform = Transform3D(3.75229e-07, 0.262863, 0.964833, 0.999999, -2.9198e-06, 6.39644e-07, 3.12392e-06, 0.964833, -0.262863, 0.662643, 0.636705, -0.0430841)
+
+[node name="1H_Sword" parent="Player/MeshRoot/Knight/Rig/Skeleton3D" index="5"]
+transform = Transform3D(-4.6895e-07, -0.149894, 0.988701, 0.999999, -1.76006e-07, 1.78814e-07, 4.87279e-07, 0.988701, 0.149894, -0.496054, 0.64103, 0.139528)
+
+[node name="2H_Sword" parent="Player/MeshRoot/Knight/Rig/Skeleton3D" index="6"]
+transform = Transform3D(-4.8469e-07, -0.149894, 0.988701, 0.999999, -1.9074e-07, 1.925e-07, 4.99794e-07, 0.988701, 0.149894, -0.496054, 0.64103, 0.139528)
+
+[node name="Knight_Helmet" parent="Player/MeshRoot/Knight/Rig/Skeleton3D" index="7"]
+transform = Transform3D(0.99972, -1.40143e-09, 0.0236466, 1.39341e-09, 1, 3.55686e-10, -0.0236466, -3.22637e-10, 0.99972, 4.69869e-07, 1.20229, -1.19779e-07)
+
+[node name="Knight_Cape" parent="Player/MeshRoot/Knight/Rig/Skeleton3D" index="8"]
+transform = Transform3D(0.996275, -5.14962e-09, 0.0862353, 5.13043e-09, 1, 4.44077e-10, -0.0862353, 1.88007e-15, 0.996275, -1.63023e-08, 1.20229, -1.40136e-07)
+
+[node name="AnimationTree" type="AnimationTree" parent="Player/MeshRoot"]
+root_node = NodePath("../Knight")
+tree_root = SubResource("AnimationNodeBlendTree_kb7el")
+anim_player = NodePath("../Knight/AnimationPlayer")
+parameters/movement_anim_speed/scale = 1.0
+parameters/movement_blend/blend_position = 1.20954
+
+[node name="CamRoot" type="Node3D" parent="Player" node_paths=PackedStringArray("player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+script = ExtResource("3_rfcsp")
+player = NodePath("..")
+
+[node name="CamYaw" type="Node3D" parent="Player/CamRoot"]
+
+[node name="CamPitch" type="Node3D" parent="Player/CamRoot/CamYaw"]
+transform = Transform3D(1, 0, 0, 0, 0.906307, -0.422618, 0, 0.422618, 0.906307, 0, 0, 0)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="Player/CamRoot/CamYaw/CamPitch"]
+transform = Transform3D(-1, 0, -8.74229e-08, -1.77636e-15, 1, 0, 8.74229e-08, 0, -1, 0, 0, 0)
+shape = SubResource("SphereShape3D_c1ggj")
+spring_length = 4.0
+
+[node name="Camera3D" type="Camera3D" parent="Player/CamRoot/CamYaw/CamPitch/SpringArm3D"]
+transform = Transform3D(1, 1.77636e-15, -9.9476e-14, 0, 1, 0, 0, 0, 1, 0, 0, 2.5)
+current = true
+
+[connection signal="set_movement_direction" from="Player" to="Player/MovementController" method="_on_set_movement_direction"]
+[connection signal="set_movement_state" from="Player" to="Player/CamRoot" method="_on_set_movement_state"]
+[connection signal="set_movement_state" from="Player" to="Player/MovementController" method="_on_set_movement_state"]
+[connection signal="set_movement_state" from="Player" to="Player/AnimationController" method="_on_set_movement_state"]
+[connection signal="set_cam_rotation" from="Player/CamRoot" to="Player/MovementController" method="_on_set_cam_rotation"]
+
+[editable path="Player/MeshRoot/Knight"]
