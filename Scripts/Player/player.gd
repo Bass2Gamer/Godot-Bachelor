@@ -4,11 +4,13 @@ signal pressed_jump(jump_state : JumpState)
 signal set_movement_state(_movement_state: MovementState)
 signal set_movement_direction(_movement_direction: Vector3)
 signal attack_triggered()
+signal player_hit()
 
 @export var jump_states : Dictionary
 @export var movement_states : Dictionary
 @export var attack_duration : float = 0.5
 @export var player_damage : float = 20.0
+@export var hit_stagger : float = 8.0
 
 var movement_direction : Vector3
 
@@ -77,7 +79,9 @@ func _on_sword_hitbox_body_entered(body: Node3D):
 	var health_comp = body.get_node_or_null("HealthComponent")
 	
 	if health_comp and health_comp is HealthComponent and not health_comp.is_dead and not enemies_hit_this_swing.has(body):
-		health_comp.take_damage(player_damage)
+		health_comp.take_damage(player_damage, global_position)
 		enemies_hit_this_swing.append(body)
-	else:
-		pass
+
+func hit(dir):
+	emit_signal("player_hit")
+	velocity += dir * hit_stagger

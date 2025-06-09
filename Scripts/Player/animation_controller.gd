@@ -13,6 +13,9 @@ func _ready():
 	if sword_hitbox:
 		sword_hitbox.monitoring = false
 		sword_hitbox.monitorable = false
+	
+	if player:
+		player.player_hit.connect(_on_player_hit)
 
 func _physics_process(delta):
 	on_floor_blend_target = 1 if player.is_on_floor() else 0
@@ -25,10 +28,8 @@ func _jump(jump_state : JumpState):
 func _on_set_movement_state(_movement_state : MovementState):
 	if player.is_attacking:
 		return
-	
 	if tween:
 		tween.kill()
-	
 	tween = create_tween()
 	tween.tween_property(animation_tree, "parameters/movement_blend/blend_position", _movement_state.id, 0.25)
 	tween.parallel().tween_property(animation_tree, "parameters/movement_anim_speed/scale", _movement_state.animation_speed, 0.7)
@@ -45,3 +46,6 @@ func disable_sword_hitbox():
 	if sword_hitbox:
 		sword_hitbox.monitoring = false
 		sword_hitbox.monitorable = false
+
+func _on_player_hit():
+	animation_tree["parameters/Hit/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE

@@ -13,7 +13,6 @@ config_version=5
 config/name="Project_godot"
 run/main_scene="uid://5e0hgg6vnc60"
 config/features=PackedStringArray("4.4", "Forward Plus")
-config/icon="res://icon.svg"
 
 [input]
 

@@ -4,6 +4,9 @@ class_name HealthComponent
 signal health_changed(new_health: float)
 signal died()
 
+@export var anim_tree : AnimationTree
+@export var death_animation_duration : float = 3.0
+
 @export var max_health : float = 100.0:
 	set(value):
 		max_health = max(0.0, value)
@@ -22,11 +25,13 @@ var current_health : float:
 
 var is_dead: bool = false
 
+@onready var enemy = get_parent()
+
 func _ready():
 	current_health = max_health
 	died.connect(die)
 
-func take_damage(amount: float):
+func take_damage(amount: float, hit_source_position: Vector3 = Vector3.ZERO): # NEW: Added hit_source_position
 	if is_dead:
 		return
 
@@ -34,21 +39,16 @@ func take_damage(amount: float):
 		return
 	
 	current_health -= amount
-	print("Took damage: ", amount, ", Current Health: ", current_health)
-
-func heal(amount: float):
-	if amount <= 0:
-		return
-	current_health += amount
-	print("Healed: ", amount, ", Current Health: ", current_health)
-
-func get_health_percentage() -> float:
-	if max_health == 0: return 0.0
-	return current_health / max_health
+	if enemy:
+		# Calculate direction from the hit source TO the enemy for stagger
+		var stagger_direction = hit_source_position.direction_to(enemy.global_position)
+		enemy.hit(stagger_direction)
 
 func die():
 	if is_dead:
 		return
 	is_dead = true
-	print("Enemy died!")
+	if anim_tree:
+		anim_tree.set("parameters/conditions/die", true)
+	await get_tree().create_timer(death_animation_duration).timeout
 	get_parent().queue_free()
