@@ -5,8 +5,7 @@ extends Node
 
 @export var player: Node
 
-func _ready() -> void:
-	spawn_enemies()  
+func _ready() -> void: 
 
 func spawn_enemies() -> void:
 	if enemy_scene == null:
