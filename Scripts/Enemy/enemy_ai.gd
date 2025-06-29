@@ -13,7 +13,9 @@ var state_machine
 @onready var anim_tree = $Skeleton_Warrior/AnimationTree
 
 func _ready():
-	player = get_node(player_path)
+	player = get_node_or_null(player_path)
+	if player == null:
+		push_warning("Enemy couldn’t find the player at %s" % player_path)
 	state_machine = anim_tree.get("parameters/playback")
 
 func _process(delta):
@@ -33,8 +35,10 @@ func _process(delta):
 	
 	move_and_slide()
 
-func _target_in_range():
-	return global_position.distance_to(player.global_position) < attack_range
+func _target_in_range() -> bool:
+	if not is_instance_valid(player):
+		return false
+	return global_transform.origin.distance_to(player.global_transform.origin) < attack_range
 
 func _hit_finished():
 	if global_position.distance_to(player.global_position) < attack_range + 1.0:
