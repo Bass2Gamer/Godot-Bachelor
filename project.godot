@@ -14,6 +14,10 @@ config/name="Project_godot"
 run/main_scene="uid://5e0hgg6vnc60"
 config/features=PackedStringArray("4.4", "Forward Plus")
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/terrain_3d/plugin.cfg")
+
 [input]
 
 forward={
